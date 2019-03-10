@@ -14,7 +14,6 @@ class LinkedList {
 protected:
     DT* _info; // the info this linked list is storing
     LinkedList<DT>* _next; // the next LinkedList in the array
-    int _size; // the size of the LinkedList, from this LinkedList on
 public:
     LinkedList(); // default constructor
     LinkedList(DT& i, LinkedList<DT>* n); // constructor
@@ -22,7 +21,7 @@ public:
     DT& operator[](int pos); // square bracket operator
     int size(); // returns the size of the LinkedList
     void add(LinkedList<DT>& newOne); // adds the new LinkedList to the beginning of the list
-    void add(DT& other); // adds a new LinkedList with DT& other as the info
+    void add(const DT& other); // adds a new LinkedList with DT& other as the info
     void insertAt(int pos, DT& x); // inserts a new LinkedList at the specified point in the LinkedList
     void remove(); // removes the first element of the LinkedList
     DT& infoAt(int pos); // gets the info at the specified point in the LinkedList
@@ -38,7 +37,7 @@ LinkedList<DT>::LinkedList() {
 //constructor. sets _info to DT& i and sets _next to the specified LinkedList
 template <class DT>
 LinkedList<DT>::LinkedList(DT& i, LinkedList<DT>* n) {
-    _info = i;
+    _info = &i;
     _next = n;
 };
 
@@ -57,10 +56,14 @@ LinkedList<DT>::~LinkedList<DT>() {
 //returns the size of the LinkedList
 template <class DT>
 int LinkedList<DT>::size() {
-    if (_info == NULL) {
-        return 0;
+    if (_next == NULL) {
+        if (_info == NULL) {
+            return 0;
+        } else {
+            return 1;
+        }
     }
-    return (1+(*_next).size());
+    return 1+(*_next).size();
 };
 
 //adds the specified LinkedList element to the beginning of the LinkedList
@@ -74,10 +77,15 @@ void LinkedList<DT>::add(LinkedList<DT>& newOne) {
 
 //adds a new LinkedList element with _info as DT& other to the beginning of the LinkedList
 template <class DT>
-void LinkedList<DT>::add(DT& other) {
-    LinkedList<DT>* temp = new LinkedList<DT>(_info,_next);
-    _info = new DT(other);
-    _next = temp;
+void LinkedList<DT>::add(const DT& other) {
+    if (_info == NULL) {
+        _info = new DT (other);
+        
+    } else {
+        LinkedList<DT>* newOne = new LinkedList<DT>(*new DT(*_info),_next);
+        *_info = other;
+        _next = newOne;
+    }
 };
 
 //inserts an element at the specified position with info DT& x
@@ -112,7 +120,7 @@ DT& LinkedList<DT>::infoAt(int pos) {
         return *_info;
     }
     else {
-        return (*_next).infoAt(pos-1);
+        return _next->infoAt(pos-1);
     }
 }
 
@@ -147,8 +155,8 @@ Term::Term() {
 
 //constructor. sets coefficient to c and exponent to e
 Term::Term(int c, int e) {
-    coefficient = c;
-    exponent = e;
+    setCoefficient(c);
+    setExponent(e);
 };
 
 //destructor. this basically just calls the default garbage collector
@@ -290,7 +298,10 @@ int Polynomial::evaluatePoly(int x) {
 
 //adds a term to this polynomial
 bool Polynomial::addTerm(int c, int e) {
-    (*myPoly).add(Term(c,e));
+    if (thereExistsATermWithExponent(e)) {
+        this->getTermWithExponent(e).setCoefficient(getCoefficientOfTermWithExponent(e) + c);
+    }
+    this->myPoly->add(Term(c,e));
     return true;
 }
 
@@ -326,8 +337,8 @@ void Polynomial::printPolynomial() {
 
 //overloads the << operator for Polynomial; uses the following format "Polynomial <polynum>: (coefficient, exponent) + ..."
 ostream& operator << (ostream& output, Polynomial &M) {
-    for (int i = 0; i < M.getDegree(); i++) {
-        output << "(" << M.getCoefficientOfTermWithExponent(i) << ", " << i << ")";
+    output << "(" << M.getCoefficientOfTermWithExponent(0) << ", " << 0 << ")";
+    for (int i = 1; i < M.getDegree(); i++) {
         if (M.thereExistsATermWithExponent(i)) {
             output << " + (" << M.getCoefficientOfTermWithExponent(i) << ", " << i << ")";
         }
@@ -339,7 +350,7 @@ ostream& operator << (ostream& output, Polynomial &M) {
  * M A I N  M E T H O D ================================================================================================================== M A I N  M E T H O D
  */
 int main() {
-    Polynomial* P = new Polynomial[10];
+    Polynomial P [10];
     char command;
     int polynum, coefficient, exponent, value, i, j;
     
@@ -348,27 +359,27 @@ int main() {
         switch (command) {
             case 'I':
                 cin >> polynum >> coefficient >> exponent;
-                cout << (P[polynum].addTerm (coefficient, exponent)) << endl;
+                cout << (P[polynum-1].addTerm (coefficient, exponent)) << endl;
                 break;
             case 'D':
                 cin >> polynum >> exponent;
-                cout << (P[polynum].deleteTerm(exponent)) << endl;
+                cout << (P[polynum-1].deleteTerm(exponent)) << endl;
                 break;
             case 'A':
                 cin >> i >> j;
-                cout << (P[i] + P[j]) << endl;
+                cout << (P[i-1] + P[j-1]) << endl;
                 break;
             case 'M':
                 cin >> i >> j;
-                cout << (P[i] * P[j]) << endl;
+                cout << (P[i-1] * P[j-1]) << endl;
                 break;
             case 'E':
                 cin >> polynum >> value;
-                cout << P[polynum].evaluatePoly(value) << endl;
+                cout << P[polynum-1].evaluatePoly(value) << endl;
                 break;
             case 'P':
                 cin >> polynum;
-                cout << P[polynum] << endl;
+                cout << P[polynum-1] << endl;
                 break;
             default:
                 cout << "I missed something" << endl;
