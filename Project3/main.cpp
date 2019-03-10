@@ -369,7 +369,16 @@ bool Polynomial::deleteTerm(int e) {
 
 //adds the specified polynomials together and returns the output
 Polynomial* Polynomial::addPolynomial(Polynomial &M) {
-    return &M;
+    Polynomial* temp = new Polynomial();
+    
+    for (int i = 0; i < this->getNumberOfTerms(); i++) {
+        temp->addTerm(this->getCoefficientAt(i), this->getExponentAt(i));
+    }
+    for (int i = 0; i < M.getNumberOfTerms(); i++) {
+        temp->addTerm(M.getCoefficientAt(i), M.getExponentAt(i));
+    }
+    
+    return temp;
 }
 
 //overloads the + operator; simply uses the addPolynomial function
@@ -379,7 +388,15 @@ Polynomial* Polynomial::operator+(Polynomial &M) {
 
 //multiples the specified polynomials together and returns the output
 Polynomial* Polynomial::multiplyPolynomial(Polynomial &M) {
-    return &M;
+    Polynomial* temp = new Polynomial();
+    
+    for (int i = 0; i < this->getNumberOfTerms(); i++) {
+        for (int j = 0; j < M.getNumberOfTerms(); j++) {
+            temp->addTerm((this->getCoefficientAt(i) * M.getCoefficientAt(j)), (this->getExponentAt(i) + M.getExponentAt(j)));
+        }
+    }
+    
+    return temp;
 }
 
 //overloads the * operator; simply uses the multiplyPolynomial function
@@ -395,7 +412,7 @@ void Polynomial::printPolynomial() {
 //overloads the << operator for Polynomial; uses the following format "Polynomial <polynum>: (coefficient, exponent) + ..."
 ostream& operator << (ostream& output, Polynomial &M) {
     output << "(" << M.getCoefficientOfTermWithExponent(M.getDegree()) << ", " << M.getDegree() << ")";
-    for (int i = 1; i < M.getDegree(); i++) {
+    for (int i = M.getDegree()-1; i > -1; i--) {
         if (M.thereExistsATermWithExponent(i)) {
             output << " + (" << M.getCoefficientOfTermWithExponent(i) << ", " << i << ")";
         }
@@ -426,11 +443,13 @@ int main() {
                 break;
             case 'A':
                 cin >> i >> j;
-                cout << (P[i-1] + P[j-1]) << endl << endl;
+                cout << "Adding Polynomial " << i << " [" << P[i-1] << "] and Polynomial " << j << " [" << P[j-1] << "]" << endl;
+                cout << *(P[i-1] + P[j-1]) << endl << endl;
                 break;
             case 'M':
                 cin >> i >> j;
-                cout << (P[i-1] * P[j-1]) << endl << endl;
+                cout << "Multiplying Polynomial " << i << " [" << P[i-1] << "] and Polynomial " << j << " [" << P[j-1] << "]" << endl;
+                cout << *(P[i-1] * P[j-1]) << endl << endl;
                 break;
             case 'E':
                 cin >> polynum >> value;
