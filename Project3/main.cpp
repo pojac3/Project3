@@ -124,6 +124,7 @@ DT& LinkedList<DT>::operator[](int pos) {
 /**
  * T E R M ============================================================================================================================================ T E R M
  */
+
 class Term {
 protected:
     int coefficient; // the coefficient of this term
@@ -176,23 +177,32 @@ void Term::setExponent(int e) {
 }
 
 /**
- * E X P O N E N T ============================================================================================================================ E X P O N E N T
+ * P O L Y N O M I A L ==================================================================================================================== P O L Y N O M I A L
  */
 
 class Polynomial {
+    friend ostream &operator << (ostream& output, Polynomial &M);
 protected:
     LinkedList<Term>* myPoly;
 public:
     Polynomial();
-    virtual ~Polynomial();
-    int getDegree();
-    int getNumberOfTerms();
-    Term getTermAt(int i);
-    int getCoefficientAt(int i);
-    int getExponentAt(int i);
-    bool thereExistsATermWithExponent(int e);
-    Term getTermWithExponent(int e);
-    int getCoefficientOfTermWithExponent(int e);
+    virtual ~Polynomial ();
+    int getDegree ();
+    int getNumberOfTerms ();
+    Term getTermAt (int i);
+    int getCoefficientAt (int i);
+    int getExponentAt (int i);
+    bool thereExistsATermWithExponent (int e);
+    Term getTermWithExponent (int e);
+    int getCoefficientOfTermWithExponent (int e);
+    int evaluatePoly (int x);
+    bool addTerm (int c, int e);
+    bool deleteTerm (int e);
+    Polynomial *addPolynomial (Polynomial& M);
+    Polynomial *operator+ (Polynomial& M);
+    Polynomial *multiplyPolynomial(Polynomial& M);
+    Polynomial *operator* (Polynomial& M);
+    void printPolynomial();
 };
 
 //default and only constructor. Creates a polynomial with no terms
@@ -267,10 +277,105 @@ int Polynomial::getCoefficientOfTermWithExponent(int e) {
     return 0;
 }
 
+//takes in the variable x and evaluates the polynomial as that variable
+int Polynomial::evaluatePoly(int x) {
+    int sum = 0;
+    
+    for (int i = 0; i < this->getNumberOfTerms(); i++) {
+        sum += ((this->myPoly->infoAt(i).getCoefficient() * x)^this->myPoly->infoAt(i).getExponent());
+    }
+    
+    return sum;
+}
+
+//adds a term to this polynomial
+bool Polynomial::addTerm(int c, int e) {
+    (*myPoly).add(Term(c,e));
+    return true;
+}
+
+//deletes the term with the specified coefficient and exponent from this polynomial
+bool Polynomial::deleteTerm(int e) {
+    return true;
+}
+
+//adds the specified polynomials together and returns the output
+Polynomial* Polynomial::addPolynomial(Polynomial &M) {
+    return nullptr;
+}
+
+//overloads the + operator; simply uses the addPolynomial function
+Polynomial* Polynomial::operator+(Polynomial &M) {
+    return this->addPolynomial(M);
+}
+
+//multiples the specified polynomials together and returns the output
+Polynomial* Polynomial::multiplyPolynomial(Polynomial &M) {
+    return nullptr;
+}
+
+//overloads the * operator; simply uses the multiplyPolynomial function
+Polynomial* Polynomial::operator*(Polynomial &M) {
+    return this->multiplyPolynomial(M);
+}
+
+//prints the specified polynomial in the format "Polynomial <polynum>: (coefficient, exponent) + ..."
+void Polynomial::printPolynomial() {
+    cout << this;
+}
+
+//overloads the << operator for Polynomial; uses the following format "Polynomial <polynum>: (coefficient, exponent) + ..."
+ostream& operator << (ostream& output, Polynomial &M) {
+    for (int i = 0; i < M.getDegree(); i++) {
+        output << "(" << M.getCoefficientOfTermWithExponent(i) << ", " << i << ")";
+        if (M.thereExistsATermWithExponent(i)) {
+            output << " + (" << M.getCoefficientOfTermWithExponent(i) << ", " << i << ")";
+        }
+    }
+    return output;
+}
+
 /**
  * M A I N  M E T H O D ================================================================================================================== M A I N  M E T H O D
  */
 int main() {
+    Polynomial* P = new Polynomial[10];
+    char command;
+    int polynum, coefficient, exponent, value, i, j;
+    
+    cin >> command;
+    while (!cin.eof()) {
+        switch (command) {
+            case 'I':
+                cin >> polynum >> coefficient >> exponent;
+                cout << (P[polynum].addTerm (coefficient, exponent)) << endl;
+                break;
+            case 'D':
+                cin >> polynum >> exponent;
+                cout << (P[polynum].deleteTerm(exponent)) << endl;
+                break;
+            case 'A':
+                cin >> i >> j;
+                cout << (P[i] + P[j]) << endl;
+                break;
+            case 'M':
+                cin >> i >> j;
+                cout << (P[i] * P[j]) << endl;
+                break;
+            case 'E':
+                cin >> polynum >> value;
+                cout << P[polynum].evaluatePoly(value) << endl;
+                break;
+            case 'P':
+                cin >> polynum;
+                cout << P[polynum] << endl;
+                break;
+            default:
+                cout << "I missed something" << endl;
+        }
+        cin >> command;
+        
+    }
     
     return 0;
 }
