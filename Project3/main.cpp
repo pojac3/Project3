@@ -17,13 +17,15 @@ protected:
 public:
     LinkedList(); // default constructor
     LinkedList(DT& i, LinkedList<DT>* n); // constructor
+    LinkedList(const LinkedList<DT>& ll);
     virtual ~LinkedList(); //destructor
     DT& operator[](int pos); // square bracket operator
     int size(); // returns the size of the LinkedList
     void add(LinkedList<DT>& newOne); // adds the new LinkedList to the beginning of the list
     void add(const DT& other); // adds a new LinkedList with DT& other as the info
     void insertAt(int pos, DT& x); // inserts a new LinkedList at the specified point in the LinkedList
-    void remove(); // removes the first element of the LinkedList
+    DT remove(); // removes the first element of the LinkedList
+    DT removeAt(int pos);
     DT& infoAt(int pos); // gets the info at the specified point in the LinkedList
 };
 
@@ -101,16 +103,20 @@ void LinkedList<DT>::insertAt(int pos, DT& x) {
 
 //deletes the LinkedList and then rejoins the pieces
 template <class DT>
-void LinkedList<DT>::remove() {
-    if (_info != NULL) {
-        delete _info;
-        LinkedList<DT>* temp = _next;
-        _info = (*temp)._info;
-        _next = (*temp)._next;
-        (*temp)._info = NULL;
-        (*temp)._next = NULL;
-        delete temp;
+DT LinkedList<DT>::remove() {
+    DT temp = *_info;
+    delete _info;
+    if (_next == NULL) {
+        _info = NULL;
+    } else {
+        LinkedList<DT>* oldNext = _next;
+        _info = _next->_info;
+        _next = _next->_next;
+        oldNext->_info = NULL;
+        oldNext->_next = NULL;
+        delete oldNext;
     }
+    return temp;
 }
 
 //gets the info at the specified position
@@ -127,6 +133,31 @@ DT& LinkedList<DT>::infoAt(int pos) {
 template <class DT>
 DT& LinkedList<DT>::operator[](int pos) {
     return infoAt(pos);
+}
+
+template <class DT>
+LinkedList<DT>::LinkedList (const LinkedList<DT>& ll) {
+    if (ll._info == NULL) {
+        _info = NULL;
+    }
+    else {
+        _info = new DT(*(ll._info));
+    }
+    if (ll._next == NULL) {
+        _next = NULL;
+    } else {
+        _next = new LinkedList<DT> (*(ll._next));
+    }
+}
+
+//removes the element at the pos position
+template <class DT>
+DT LinkedList<DT>::removeAt(int pos) {
+    if (pos == 0) {
+        return remove();
+    } else {
+        return _next->removeAt(pos-1);
+    }
 }
 
 /**
@@ -203,6 +234,7 @@ public:
     bool thereExistsATermWithExponent (int e);
     Term getTermWithExponent (int e);
     int getCoefficientOfTermWithExponent (int e);
+    void setCoefficientOfTermWithExponent(int c, int e);
     int evaluatePoly (int x);
     bool addTerm (int c, int e);
     bool deleteTerm (int e);
@@ -285,34 +317,59 @@ int Polynomial::getCoefficientOfTermWithExponent(int e) {
     return 0;
 }
 
+//sets the coefficient of the term with exponent e to c
+void Polynomial::setCoefficientOfTermWithExponent(int c, int e) {
+    for (int i = 0; i < (*myPoly).size(); i++) {
+        if (getExponentAt(i) == e) {
+            myPoly->infoAt(i).setCoefficient(c);
+        }
+    }
+}
+
 //takes in the variable x and evaluates the polynomial as that variable
 int Polynomial::evaluatePoly(int x) {
-    int sum = 0;
-    
+    int total = 0;
+    int c, e, sum;
     for (int i = 0; i < this->getNumberOfTerms(); i++) {
-        sum += ((this->myPoly->infoAt(i).getCoefficient() * x)^this->myPoly->infoAt(i).getExponent());
+        c = this->myPoly->infoAt(i).getCoefficient();
+        e = this->myPoly->infoAt(i).getExponent();
+        sum = x;
+        for (int i = 1; i < e; i++) {
+            sum *= x;
+        }
+        sum *= c;
+        total += sum;
     }
     
-    return sum;
+    return total;
 }
 
 //adds a term to this polynomial
 bool Polynomial::addTerm(int c, int e) {
     if (thereExistsATermWithExponent(e)) {
-        this->getTermWithExponent(e).setCoefficient(getCoefficientOfTermWithExponent(e) + c);
+        this->setCoefficientOfTermWithExponent((getCoefficientOfTermWithExponent(e) + c), e);
+        return false;
+    } else {
+        this->myPoly->add(Term(c,e));
+        return true;
     }
-    this->myPoly->add(Term(c,e));
-    return true;
+    return false;
 }
 
 //deletes the term with the specified coefficient and exponent from this polynomial
 bool Polynomial::deleteTerm(int e) {
-    return true;
+    for (int i = 0; i < getNumberOfTerms(); i++) {
+        if (this->getExponentAt(i) == e) {
+            this->myPoly->removeAt(i);
+            return true;
+        }
+    }
+    return false;
 }
 
 //adds the specified polynomials together and returns the output
 Polynomial* Polynomial::addPolynomial(Polynomial &M) {
-    return nullptr;
+    return &M;
 }
 
 //overloads the + operator; simply uses the addPolynomial function
@@ -322,7 +379,7 @@ Polynomial* Polynomial::operator+(Polynomial &M) {
 
 //multiples the specified polynomials together and returns the output
 Polynomial* Polynomial::multiplyPolynomial(Polynomial &M) {
-    return nullptr;
+    return &M;
 }
 
 //overloads the * operator; simply uses the multiplyPolynomial function
@@ -337,7 +394,7 @@ void Polynomial::printPolynomial() {
 
 //overloads the << operator for Polynomial; uses the following format "Polynomial <polynum>: (coefficient, exponent) + ..."
 ostream& operator << (ostream& output, Polynomial &M) {
-    output << "(" << M.getCoefficientOfTermWithExponent(0) << ", " << 0 << ")";
+    output << "(" << M.getCoefficientOfTermWithExponent(M.getDegree()) << ", " << M.getDegree() << ")";
     for (int i = 1; i < M.getDegree(); i++) {
         if (M.thereExistsATermWithExponent(i)) {
             output << " + (" << M.getCoefficientOfTermWithExponent(i) << ", " << i << ")";
@@ -359,34 +416,38 @@ int main() {
         switch (command) {
             case 'I':
                 cin >> polynum >> coefficient >> exponent;
-                cout << (P[polynum-1].addTerm (coefficient, exponent)) << endl;
+                cout << "Attempting to insert term with coefficient " << coefficient << " and exponent " << exponent  << "..." << endl;
+                cout << ((P[polynum-1].addTerm (coefficient, exponent)) ? "Inserted!" : "Not inserted, but added to the term with the same exponent") << endl << endl;
                 break;
             case 'D':
                 cin >> polynum >> exponent;
-                cout << (P[polynum-1].deleteTerm(exponent)) << endl;
+                cout << "Attempting to delete term with exponent " << exponent << "..." << endl;
+                cout << ((P[polynum-1].deleteTerm (exponent)) ? "Deleted!" : "Could not find a term with that exponent") << endl << endl;
                 break;
             case 'A':
                 cin >> i >> j;
-                cout << (P[i-1] + P[j-1]) << endl;
+                cout << (P[i-1] + P[j-1]) << endl << endl;
                 break;
             case 'M':
                 cin >> i >> j;
-                cout << (P[i-1] * P[j-1]) << endl;
+                cout << (P[i-1] * P[j-1]) << endl << endl;
                 break;
             case 'E':
                 cin >> polynum >> value;
-                cout << P[polynum-1].evaluatePoly(value) << endl;
+                cout << "Evalutating polynomial " << polynum << " with x = " << value << ": " << P[polynum-1] << endl;
+                cout << P[polynum-1].evaluatePoly(value) << endl << endl;
                 break;
             case 'P':
                 cin >> polynum;
-                cout << P[polynum-1] << endl;
+                cout << "Polynomial " << polynum << ": " << P[polynum-1] << endl << endl;
                 break;
             default:
-                cout << "I missed something" << endl;
+                cout << "I missed something" << endl << endl;
         }
         cin >> command;
         
     }
+    
     
     return 0;
 }
