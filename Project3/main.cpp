@@ -135,6 +135,7 @@ DT& LinkedList<DT>::operator[](int pos) {
     return infoAt(pos);
 }
 
+//coppy constructor
 template <class DT>
 LinkedList<DT>::LinkedList (const LinkedList<DT>& ll) {
     if (ll._info == NULL) {
@@ -220,29 +221,29 @@ void Term::setExponent(int e) {
  */
 
 class Polynomial {
-    friend ostream &operator << (ostream& output, Polynomial &M);
+    friend ostream &operator << (ostream& output, Polynomial &M); // << operator
 protected:
-    LinkedList<Term>* myPoly;
+    LinkedList<Term>* myPoly; //this is the main LinkedList that stores all of the values
 public:
-    Polynomial();
-    virtual ~Polynomial ();
-    int getDegree ();
-    int getNumberOfTerms ();
-    Term getTermAt (int i);
-    int getCoefficientAt (int i);
-    int getExponentAt (int i);
-    bool thereExistsATermWithExponent (int e);
-    Term getTermWithExponent (int e);
-    int getCoefficientOfTermWithExponent (int e);
-    void setCoefficientOfTermWithExponent(int c, int e);
-    int evaluatePoly (int x);
-    bool addTerm (int c, int e);
-    bool deleteTerm (int e);
-    Polynomial *addPolynomial (Polynomial& M);
-    Polynomial *operator+ (Polynomial& M);
-    Polynomial *multiplyPolynomial(Polynomial& M);
-    Polynomial *operator* (Polynomial& M);
-    void printPolynomial();
+    Polynomial(); //default constructor
+    virtual ~Polynomial (); //destructor
+    int getDegree (); //gets the degree of this polynomial (highest exponent)
+    int getNumberOfTerms (); //gets the number of terms in this polynomial
+    Term getTermAt (int i); //gets the term at index i
+    int getCoefficientAt (int i); //gets the coefficient at index i
+    int getExponentAt (int i); //gets the exponent at index i
+    bool thereExistsATermWithExponent (int e); //says whether or not there is a term with exponent e
+    Term getTermWithExponent (int e); //gets the term with exponent e
+    int getCoefficientOfTermWithExponent (int e); //gets the coefficient of the term with exponent e
+    void setCoefficientOfTermWithExponent(int c, int e); //sets the coefficient of the term with exponent e to the specified value c
+    int evaluatePoly (int x); //evaluates the polynomial with value x
+    bool addTerm (int c, int e); //adds a term with coefficient c and exponent e to this Polynomial and returns whether or not it was added or already existed
+    bool deleteTerm (int e); //deletes the term with exponent e
+    Polynomial *addPolynomial (Polynomial& M); //adds this Polynomial to the specified Polynomial and returns the output
+    Polynomial *operator+ (Polynomial& M); //overloads the + operator to use the addPolynomial method
+    Polynomial *multiplyPolynomial(Polynomial& M); //multiplies this Polynomial and the specified polynomial together and returns the output
+    Polynomial *operator* (Polynomial& M); //overloads the * operator to use the multiplyPolynomial method
+    void printPolynomial(); //prints this Polynomial in the format (<coefficient, exponent>) + ...
 };
 
 //default and only constructor. Creates a polynomial with no terms
@@ -252,14 +253,18 @@ Polynomial::Polynomial() {
 
 //destructor. just calls the default garbage collector for now
 Polynomial::~Polynomial() {
-    
 };
 
 //finds the degree of the polynomial and returns it
 int Polynomial::getDegree() {
+    //starts from -1 in case the degree of the Polynomial is 0
     int currentDegree = -1;
+    
+    //looping through all of the terms
     for (int i = 0; i < getNumberOfTerms(); i++) {
+        //checking if the degree of the current term is higher than the last
         if (currentDegree < getExponentAt(i)) {
+            //setting the degree to this terms exponent 
             currentDegree = getExponentAt(i);
         }
     }
@@ -268,28 +273,36 @@ int Polynomial::getDegree() {
 
 //gets the total number of terms in this polynomial
 int Polynomial::getNumberOfTerms() {
+    //simply calls the sizs method on myPoly
     return (*myPoly).size();
 }
 
 //returns the term at the specified index
 Term Polynomial::getTermAt(int i) {
+    //simply calls infoAt on myPoly
     return (*myPoly).infoAt(i);
 }
 
 //returns the coefficient of the term at the specified index
 int Polynomial::getCoefficientAt(int i) {
+    //gets the specified index from myPoly, gets the coefficient and returns it
     return (*myPoly).infoAt(i).getCoefficient();
 }
 
 //returns the exponenet of the term at the specified index
 int Polynomial::getExponentAt(int i) {
+    //gets the specified index from myPoly, gets the exponent and returns it
     return (*myPoly).infoAt(i).getExponent();
 }
 
 //returns true if there is a term with exponent e in this polynomial, false otherwise
 bool Polynomial::thereExistsATermWithExponent(int e) {
+    //defaults to false
     bool returnBool = false;
+    
+    //looping through of the terms in this polynomial
     for (int i = 0; i < (*myPoly).size(); i++) {
+        //if the exponent at this index is equal to the specified exponent, returns true
         if (getExponentAt(i) == e) {
             returnBool = true;
         }
@@ -299,17 +312,22 @@ bool Polynomial::thereExistsATermWithExponent(int e) {
 
 //gets the term object with exponent e. if one does not exist, returns a default term
 Term Polynomial::getTermWithExponent(int e) {
+    //looping through all of the terms in this polynomial
     for (int i = 0; i < (*myPoly).size(); i++) {
+        //if this exponent at this index is equal to the specified index, then return the term at this index
         if (getExponentAt(i) == e) {
             return getTermAt(i);
         }
     }
+    //otherwise returns a default Term
     return Term();
 }
 
 //gets the coefficient of the term with exponent e. if one does not exist, returns 0
 int Polynomial::getCoefficientOfTermWithExponent(int e) {
+    //looping through all of the terms in this polynomial
     for (int i = 0; i < (*myPoly).size(); i++) {
+        //if this exponent at this index is equal to the specified exponent, then returns the coefficient at this index
         if (getExponentAt(i) == e) {
             return getCoefficientAt(i);
         }
@@ -319,7 +337,9 @@ int Polynomial::getCoefficientOfTermWithExponent(int e) {
 
 //sets the coefficient of the term with exponent e to c
 void Polynomial::setCoefficientOfTermWithExponent(int c, int e) {
+    //looping through all of the terms in this polynomial
     for (int i = 0; i < (*myPoly).size(); i++) {
+        //if this exponent at this index is equal to the specified exponent, then set the coefficient at this index
         if (getExponentAt(i) == e) {
             myPoly->infoAt(i).setCoefficient(c);
         }
@@ -328,16 +348,21 @@ void Polynomial::setCoefficientOfTermWithExponent(int c, int e) {
 
 //takes in the variable x and evaluates the polynomial as that variable
 int Polynomial::evaluatePoly(int x) {
+    //starting total at 0
     int total = 0;
     int c, e, sum;
+    //loops through each term and evaluates
     for (int i = 0; i < this->getNumberOfTerms(); i++) {
         c = this->myPoly->infoAt(i).getCoefficient();
         e = this->myPoly->infoAt(i).getExponent();
         sum = x;
+        //evaluating the exponent first by looping through and multiplying itself e number of times
         for (int i = 1; i < e; i++) {
             sum *= x;
         }
+        //multiplying by the coefficient
         sum *= c;
+        //adding to the total
         total += sum;
     }
     
@@ -346,19 +371,25 @@ int Polynomial::evaluatePoly(int x) {
 
 //adds a term to this polynomial
 bool Polynomial::addTerm(int c, int e) {
+    //if the term already exists...
     if (thereExistsATermWithExponent(e)) {
+        //add c to the coefficient of the term
         this->setCoefficientOfTermWithExponent((getCoefficientOfTermWithExponent(e) + c), e);
+        //returns false because a term was not added to this polynomial
         return false;
     } else {
+        //if the term doesnt already exist then add the term to myPoly
         this->myPoly->add(Term(c,e));
+        //returns true because the term was added
         return true;
     }
-    return false;
 }
 
 //deletes the term with the specified coefficient and exponent from this polynomial
 bool Polynomial::deleteTerm(int e) {
+    //loops through the array
     for (int i = 0; i < getNumberOfTerms(); i++) {
+        //if we have found the term with the exponent then remove that guy
         if (this->getExponentAt(i) == e) {
             this->myPoly->removeAt(i);
             return true;
@@ -369,54 +400,65 @@ bool Polynomial::deleteTerm(int e) {
 
 //adds the specified polynomials together and returns the output
 Polynomial* Polynomial::addPolynomial(Polynomial &M) {
+    //this is the Polynomial* we will return
     Polynomial* temp = new Polynomial();
-    
+    //loop through this Polynomial and add each terms
     for (int i = 0; i < this->getNumberOfTerms(); i++) {
         temp->addTerm(this->getCoefficientAt(i), this->getExponentAt(i));
     }
+    //loop through M and add each term. The addTerm method automatically adds each term together that have like exponents
     for (int i = 0; i < M.getNumberOfTerms(); i++) {
         temp->addTerm(M.getCoefficientAt(i), M.getExponentAt(i));
     }
-    
+    //returning temp
     return temp;
 }
 
 //overloads the + operator; simply uses the addPolynomial function
 Polynomial* Polynomial::operator+(Polynomial &M) {
+    //simply calls the addPolynomial function
     return this->addPolynomial(M);
 }
 
 //multiples the specified polynomials together and returns the output
 Polynomial* Polynomial::multiplyPolynomial(Polynomial &M) {
+    //this is the Polynomial* we will return
     Polynomial* temp = new Polynomial();
-    
+    //loops through this Polynomial
     for (int i = 0; i < this->getNumberOfTerms(); i++) {
+        //loops through M
         for (int j = 0; j < M.getNumberOfTerms(); j++) {
+            //multiplies the coefficient together and adds the exponents together and adds a term to temp with those values
             temp->addTerm((this->getCoefficientAt(i) * M.getCoefficientAt(j)), (this->getExponentAt(i) + M.getExponentAt(j)));
         }
     }
-    
+    //returing temp
     return temp;
 }
 
 //overloads the * operator; simply uses the multiplyPolynomial function
 Polynomial* Polynomial::operator*(Polynomial &M) {
+    //simply calls the multiplyPolynomial function
     return this->multiplyPolynomial(M);
 }
 
 //prints the specified polynomial in the format "Polynomial <polynum>: (coefficient, exponent) + ..."
 void Polynomial::printPolynomial() {
+    //couts the polynomial
     cout << this;
 }
 
 //overloads the << operator for Polynomial; uses the following format "Polynomial <polynum>: (coefficient, exponent) + ..."
 ostream& operator << (ostream& output, Polynomial &M) {
+    //priming the output with the first term
     output << "(" << M.getCoefficientOfTermWithExponent(M.getDegree()) << ", " << M.getDegree() << ")";
+    //looping through and repeating
     for (int i = M.getDegree()-1; i > -1; i--) {
         if (M.thereExistsATermWithExponent(i)) {
             output << " + (" << M.getCoefficientOfTermWithExponent(i) << ", " << i << ")";
         }
     }
+    //returning the output
     return output;
 }
 
