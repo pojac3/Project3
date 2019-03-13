@@ -305,7 +305,7 @@ bool Polynomial::thereExistsATermWithExponent(int e) {
     //looping through of the terms in this polynomial
     for (int i = 0; i < (*myPoly).size(); i++) {
         //if the exponent at this index is equal to the specified exponent, returns true
-        if (getExponentAt(i) == e) {
+        if ((getExponentAt(i) == e) && getCoefficientOfTermWithExponent(e) != 0) {
             returnBool = true;
         }
     }
@@ -389,13 +389,9 @@ bool Polynomial::addTerm(int c, int e) {
 
 //deletes the term with the specified coefficient and exponent from this polynomial
 bool Polynomial::deleteTerm(int e) {
-    //loops through the array
-    for (int i = 0; i < getNumberOfTerms(); i++) {
-        //if we have found the term with the exponent then remove that guy
-        if (this->getExponentAt(i) == e) {
-            this->myPoly->removeAt(i);
-            return true;
-        }
+    if (thereExistsATermWithExponent(e)) {
+        this->setCoefficientOfTermWithExponent(0, e);
+        return true;
     }
     return false;
 }
@@ -452,12 +448,17 @@ void Polynomial::printPolynomial() {
 
 //overloads the << operator for Polynomial; uses the following format "Polynomial <polynum>: (coefficient, exponent) + ..."
 ostream& operator << (ostream& output, Polynomial &M) {
-    //priming the output with the first term
-    output << "(" << M.getCoefficientOfTermWithExponent(M.getDegree()) << ", " << M.getDegree() << ")";
-    //looping through and repeating
-    for (int i = M.getDegree()-1; i > -1; i--) {
-        if (M.thereExistsATermWithExponent(i)) {
-            output << " + (" << M.getCoefficientOfTermWithExponent(i) << ", " << i << ")";
+    bool atFirst = true; //variable to keep track adn check if we are at the first term
+    //looping through and printing
+    for (int i = M.getDegree(); i > -1; i--) {
+        if (M.thereExistsATermWithExponent(i) && M.getCoefficientOfTermWithExponent(i) != 0) {
+            if (atFirst) {
+                output << "(" << M.getCoefficientOfTermWithExponent(i) << ", " << i << ")";
+                atFirst = false;
+            }
+            else if (!atFirst) {
+                output << " + (" << M.getCoefficientOfTermWithExponent(i) << ", " << i << ")";
+            }
         }
     }
     //returning the output
@@ -477,12 +478,12 @@ int main() {
         switch (command) {
             case 'I':
                 cin >> polynum >> coefficient >> exponent;
-                cout << "Attempting to insert term with coefficient " << coefficient << " and exponent " << exponent  << "..." << endl;
+                cout << "Attempting to insert term with coefficient " << coefficient << " and exponent " << exponent  << " into Polynomial "<< polynum << "..." << endl;
                 cout << ((P[polynum-1].addTerm (coefficient, exponent)) ? "Inserted!" : "Not inserted, but added to the term with the same exponent") << endl << endl;
                 break;
             case 'D':
                 cin >> polynum >> exponent;
-                cout << "Attempting to delete term with exponent " << exponent << "..." << endl;
+                cout << "Attempting to delete term with exponent " << exponent << " from Polynomial " << polynum << "..." << endl;
                 cout << ((P[polynum-1].deleteTerm (exponent)) ? "Deleted!" : "Could not find a term with that exponent") << endl << endl;
                 break;
             case 'A':
