@@ -8,7 +8,9 @@ using namespace std;
 
 /**
  * L I N K E D  L I S T =================================================================================================================  L I N K E D  L I S T
+ * Some algorithms were taken from "Data Structures for C++ by Sridhar Radhakrishnan"
  */
+
 template <class DT>
 class LinkedList {
 protected:
@@ -25,7 +27,7 @@ public:
     void add(const DT& other); // adds a new LinkedList with DT& other as the info
     void insertAt(int pos, DT& x); // inserts a new LinkedList at the specified point in the LinkedList
     DT remove(); // removes the first element of the LinkedList
-    DT removeAt(int pos);
+    DT removeAt(int pos); //goes to the posth element and removes that element
     DT& infoAt(int pos); // gets the info at the specified point in the LinkedList
 };
 
@@ -109,12 +111,12 @@ DT LinkedList<DT>::remove() {
     if (_next == NULL) {
         _info = NULL;
     } else {
-        LinkedList<DT>* oldNext = _next;
+        LinkedList<DT>* old = _next;
         _info = _next->_info;
         _next = _next->_next;
-        oldNext->_info = NULL;
-        oldNext->_next = NULL;
-        delete oldNext;
+        old->_info = NULL;
+        old->_next = NULL;
+        delete old;
     }
     return temp;
 }
