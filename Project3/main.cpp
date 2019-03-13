@@ -235,6 +235,7 @@ public:
     int getCoefficientAt (int i); //gets the coefficient at index i
     int getExponentAt (int i); //gets the exponent at index i
     bool thereExistsATermWithExponent (int e); //says whether or not there is a term with exponent e
+    bool thereExistsATermWithExponentClassic (int e); //says whether or not there is a term with exponent e
     Term getTermWithExponent (int e); //gets the term with exponent e
     int getCoefficientOfTermWithExponent (int e); //gets the coefficient of the term with exponent e
     void setCoefficientOfTermWithExponent(int c, int e); //sets the coefficient of the term with exponent e to the specified value c
@@ -312,6 +313,21 @@ bool Polynomial::thereExistsATermWithExponent(int e) {
     return returnBool;
 }
 
+//returns true if there is a term with exponent e in this polynomial, false otherwise
+bool Polynomial::thereExistsATermWithExponentClassic(int e) {
+    //defaults to false
+    bool returnBool = false;
+    
+    //looping through of the terms in this polynomial
+    for (int i = 0; i < (*myPoly).size(); i++) {
+        //if the exponent at this index is equal to the specified exponent, returns true
+        if ((getExponentAt(i) == e)) {
+            returnBool = true;
+        }
+    }
+    return returnBool;
+}
+
 //gets the term object with exponent e. if one does not exist, returns a default term
 Term Polynomial::getTermWithExponent(int e) {
     //looping through all of the terms in this polynomial
@@ -374,7 +390,7 @@ int Polynomial::evaluatePoly(int x) {
 //adds a term to this polynomial
 bool Polynomial::addTerm(int c, int e) {
     //if the term already exists...
-    if (thereExistsATermWithExponent(e)) {
+    if (thereExistsATermWithExponentClassic(e)) {
         //add c to the coefficient of the term
         this->setCoefficientOfTermWithExponent((getCoefficientOfTermWithExponent(e) + c), e);
         //returns false because a term was not added to this polynomial
